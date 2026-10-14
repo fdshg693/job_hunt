@@ -1,0 +1,22 @@
+data/
+
+__pycahe__/
+*.pyc
+
+.venv/
+
+.pytest_cache/
+
+*.env
+.env
+
+
+node_modulws/
+
+temp/
+
+.playwright-cli/
+
+# Deploy Keys / SSH Keys
+sync_deploy_key*
+*.pem

@@ -1,0 +1,55 @@
+{
+  "source_repo": "microsoft/playwright",
+  "ref": "main",
+  "dir_sources": [
+    "packages/playwright-core/src/tools/skills/playwright-cli"
+  ],
+  "file_sources": [],
+  "fetched_at": "2026-09-14T14:00:13.541014+00:00",
+  "files": [
+    {
+      "output": "playwright-cli/playwright-cli-skill.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/SKILL.md"
+    },
+    {
+      "output": "playwright-cli/references/element-attributes.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/element-attributes.md"
+    },
+    {
+      "output": "playwright-cli/references/playwright-tests.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/playwright-tests.md"
+    },
+    {
+      "output": "playwright-cli/references/pr-attachments.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/pr-attachments.md"
+    },
+    {
+      "output": "playwright-cli/references/request-mocking.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/request-mocking.md"
+    },
+    {
+      "output": "playwright-cli/references/running-code.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/running-code.md"
+    },
+    {
+      "output": "playwright-cli/references/session-management.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/session-management.md"
+    },
+    {
+      "output": "playwright-cli/references/storage-state.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/storage-state.md"
+    },
+    {
+      "output": "playwright-cli/references/test-generation.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/test-generation.md"
+    },
+    {
+      "output": "playwright-cli/references/tracing.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/tracing.md"
+    },
+    {
+      "output": "playwright-cli/references/video-recording.md",
+      "source": "packages/playwright-core/src/tools/skills/playwright-cli/references/video-recording.md"
+    }
+  ]
+}
