@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, track_badge with context %}
+{% block title %}{{ c.company }}{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/companies">企業</a> / {{ track_badge(c.track) }}</p>
+<div class="title-row">
+  <h1>{{ c.company }}</h1>
+  {{ status_badge(c) }}
+  <a class="ghost-link small" href="{{ vscode_url(c.path) }}">VS Code で開く</a>
+</div>
+{% if model.aliases %}<p class="muted small">別名: {{ model.aliases | join(' / ') }}</p>{% endif %}
+
+<div class="facts">
+  <section class="card">
+    <h2>現状</h2>
+    <dl>
+      {% if c.status_note %}<dt>状況メモ</dt><dd>{{ c.status_note }}</dd>{% endif %}
+      {% if c.decline_reason %}<dt>見送り理由</dt><dd>{{ c.decline_reason }}</dd>{% endif %}
+      {% if c.action_type != 'none' %}
+      <dt>直近アクション</dt>
+      <dd><span class="badge action-{{ c.action_type }}">{{ label_of(ActionType(c.action_type)) }}</span> {{ c.next_action or '' }}{% if c.next_due %} <span class="due">{{ c.next_due }}</span>{% endif %}</dd>
+      {% endif %}
+      {% if recruiter %}<dt>紹介元</dt><dd><a href="{{ links.recruiter_url(recruiter.recruiter_key) }}">{{ recruiter.name }}</a>{% if recruiter.agency %}（{{ recruiter.agency }}）{% endif %}</dd>
+      {% elif c.recruiter %}<dt>紹介元</dt><dd>{{ c.recruiter }} <span class="muted">（リクルーターログなし）</span></dd>{% endif %}
+      {% for r in introducers if not recruiter or r.recruiter_key != recruiter.recruiter_key %}
+      <dt>紹介実績</dt><dd><a href="{{ links.recruiter_url(r.recruiter_key) }}">{{ r.name }}</a>{% if r.agency %}（{{ r.agency }}）{% endif %}</dd>
+      {% endfor %}
+      <dt>初回 / 更新</dt><dd>{{ c.date }} / {{ c.updated_at }}</dd>
+    </dl>
+  </section>
+  <section class="card">
+    <h2>条件・評価</h2>
+    <dl>
+      <dt>fit_score</dt><dd>{{ display.format_fit(c.fit_score_min, c.fit_score_max) or '-' }}{% if c.evidence_level %} <span class="muted">（{{ label_of(model.evidence_level) }}）</span>{% endif %}</dd>
+      {% if c.interest %}<dt>志望度</dt><dd class="stars">{{ display.format_interest(c.interest) }}</dd>{% endif %}
+      <dt>年収</dt><dd>{{ display.format_salary(c.salary_min, c.salary_max) or '-' }}{% if c.salary_note %}<div class="note">{{ c.salary_note }}</div>{% endif %}</dd>
+      <dt>働き方</dt><dd>{{ display.format_remote(c.remote_type, c.office_days_per_week) or '-' }}{% if c.remote_note %}<div class="note">{{ c.remote_note }}</div>{% endif %}</dd>
+      {% if c.job_title or c.job_url %}<dt>求人</dt><dd>{% if c.job_url %}<a href="{{ c.job_url }}" target="_blank" rel="noopener noreferrer">{{ c.job_title or c.job_url }}</a>{% else %}{{ c.job_title }}{% endif %}</dd>{% endif %}
+      {% for rj in model.related_jobs %}<dt>関連求人</dt><dd><a href="{{ rj.url }}" target="_blank" rel="noopener noreferrer">{{ rj.title }}</a></dd>{% endfor %}
+      {% if model.thread_url %}<dt>スレッド</dt><dd><a href="{{ model.thread_url }}" target="_blank" rel="noopener noreferrer">やり取りを開く</a></dd>{% endif %}
+    </dl>
+    {% if model.tags %}<div class="tags">{% for t in model.tags %}<a class="tag" href="/companies?tag={{ t | urlencode }}">{{ t }}</a>{% endfor %}</div>{% endif %}
+  </section>
+</div>
+
+{% if c.fit_summary %}
+<section class="card"><h2>適合度の要約</h2><p>{{ c.fit_summary }}</p></section>
+{% endif %}
+
+{% if model.verified_items or model.unverified_items %}
+<div class="facts">
+  <section class="card"><h2>確認できた事項</h2><ul>{% for v in model.verified_items %}<li>{{ v }}</li>{% endfor %}</ul></section>
+  <section class="card"><h2>未検証の事項</h2><ul>{% for v in model.unverified_items %}<li>{{ v }}</li>{% endfor %}</ul></section>
+</div>
+{% endif %}
+
+{% if model.links %}
+<section class="card">
+  <h2>参考リソース・資料リンク <span class="count">{{ model.links | length }}</span></h2>
+  <ul class="resource-links">
+    {% for l in model.links %}
+    <li class="resource-link-item">
+      <div class="resource-link-header">
+        <span class="badge link-cat-{{ l.category }}">{{ label_of(l.category) }}</span>
+        <a href="{{ l.url }}" target="_blank" rel="noopener noreferrer" class="resource-link-title">{{ l.title }}</a>
+        {% if l.material %}
+        {% set mat_stem = l.material.split('/')[-1].removesuffix('.md') %}
+        {% set mat = materials | selectattr('material_rel', 'equalto', l.material) | first %}
+        <a href="#mat-{{ mat_stem }}" class="badge material-badge" data-tab-jump="mat-{{ mat_stem }}">📄 資料を開く</a>
+        {% if mat and mat.fetched_at %}<span class="muted small" title="資料の要約を書いた・見直した日">要約 {{ mat.fetched_at }}</span>{% endif %}
+        {% elif l.fetched_at %}<span class="muted small">{{ l.fetched_at }}</span>{% endif %}
+      </div>
+      {% if l.summary %}
+      <p class="resource-link-summary muted">{{ l.summary }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if jobs %}
+<section class="card">
+  <h2>取得済みの求人</h2>
+  <ul>{% for j in jobs %}<li><a href="{{ links.ui_url(j.path) }}">{{ j.title }}</a> <span class="muted small">{{ j.source }}</span></li>{% endfor %}</ul>
+</section>
+{% endif %}
+
+<div class="tabs" data-tabs>
+  <div class="tab-list" role="tablist">
+    <button role="tab" data-tab="log" aria-selected="true">企業ログ</button>
+    {% for mat in materials %}
+    <button role="tab" data-tab="{{ mat.anchor }}" aria-selected="false">📄 {{ mat.title }}</button>
+    {% endfor %}
+    {% for iv in interviews %}
+    <button role="tab" data-tab="{{ iv.anchor }}" aria-selected="false">{{ iv.stage_label }} <span class="muted">{{ iv.date }}</span></button>
+    {% endfor %}
+  </div>
+  <article class="tab-panel markdown" id="log" role="tabpanel">{{ body }}</article>
+  {% for mat in materials %}
+  <article class="tab-panel markdown" id="{{ mat.anchor }}" role="tabpanel" hidden>
+    <p class="muted small">
+      資料: {{ mat.title }}
+      {% if mat.fetched_at %} · 要約 {{ mat.fetched_at }}{% endif %}
+      {% if mat.raw_fetched_at %} · 生データ取得 {{ mat.raw_fetched_at }}{% endif %}
+      {% if mat.source_url %} · <a href="{{ mat.source_url }}" target="_blank" rel="noopener noreferrer">元資料</a>{% endif %}
+      · <a href="{{ vscode_url(mat.path) }}">VS Code で開く</a>
+    </p>
+    {{ mat.body }}
+  </article>
+  {% endfor %}
+  {% for iv in interviews %}
+  <article class="tab-panel markdown" id="{{ iv.anchor }}" role="tabpanel" hidden>
+    <p class="muted small">
+      {{ iv.date }} · {{ iv.stage_label }} · 結果: {{ iv.result_label }}{% if iv.interviewer %} · {{ iv.interviewer }}{% endif %}
+      · <a href="{{ vscode_url(iv.path) }}">VS Code で開く</a>
+    </p>
+    {{ iv.body }}
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

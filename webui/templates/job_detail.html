@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ j.title }}{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/jobs">求人</a> / {{ j.source }}</p>
+<div class="title-row">
+  <h1>{{ j.title }}</h1>
+  <a class="ghost-link small" href="{{ vscode_url(j.path) }}">VS Code で開く</a>
+</div>
+<section class="card">
+  <dl>
+    <dt>企業</dt><dd>{{ j.company }}{% if j.company_id %} — <a href="{{ links.company_url(j.company_track, j.company_key) }}">企業ログ（{{ j.company_status_label }}）</a>{% endif %}</dd>
+    <dt>年収</dt><dd>{{ display.format_salary(j.salary_min, j.salary_max) or '-' }}{% if j.salary_text %} <span class="muted">（{{ j.salary_text }}）</span>{% endif %}</dd>
+    <dt>働き方</dt><dd>{{ j.remote_text or '-' }}</dd>
+    {% if j.location %}<dt>勤務地</dt><dd>{{ j.location }}</dd>{% endif %}
+    {% if j.url %}<dt>求人URL</dt><dd><a href="{{ j.url }}" target="_blank" rel="noopener noreferrer">{{ j.url }}</a></dd>{% endif %}
+    <dt>取得日時</dt><dd>{{ j.fetched_at or '-' }}</dd>
+  </dl>
+  {% if j.skills %}<div class="tags">{% for s in j.skills.split(',') %}<a class="tag" href="/jobs?skill={{ s | urlencode }}">{{ s }}</a>{% endfor %}</div>{% endif %}
+</section>
+<article class="card markdown">{{ body }}</article>
+{% endblock %}

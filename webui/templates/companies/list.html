@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_macros.html" import checkbox_group with context %}
+{% block title %}企業{% endblock %}
+{% block content %}
+<h1>企業</h1>
+<form class="filters" id="company-filters" action="/companies" method="get"
+      hx-get="/companies" hx-target="#results" hx-push-url="true"
+      hx-trigger="change, input changed delay:300ms from:input[type=search], input changed delay:400ms from:input[type=number]">
+  <div class="filter-row">
+    <input type="search" name="q" value="{{ f.q or '' }}" placeholder="社名・タグ・本文を検索" class="grow" aria-label="全文検索">
+    <label>track
+      <select name="track">
+        <option value="">すべて</option>
+        {% for value, label in track_options %}<option value="{{ value }}" {% if f.track == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>タグ
+      <input list="tag-list" name="tag" value="{{ f.tag or '' }}" size="12">
+      <datalist id="tag-list">{% for t in all_tags %}<option value="{{ t.tag }}">{{ t.tag }} ({{ t.n }})</option>{% endfor %}</datalist>
+    </label>
+  </div>
+  <fieldset>
+    <legend>ステータス</legend>
+    <div class="chips">{{ checkbox_group('category', category_options, f.categories) }}</div>
+    <details {% if f.statuses %}open{% endif %}>
+      <summary>個別のステータスで選ぶ</summary>
+      <div class="chips">{{ checkbox_group('status', status_options, f.statuses) }}</div>
+    </details>
+  </fieldset>
+  <div class="filter-row">
+    <label>fit 下限 ≥ <input type="number" name="fit_min" min="0" max="100" step="5" value="{{ f.fit_min if f.fit_min is not none else '' }}"></label>
+    <label>志望度 ≥ <input type="number" name="interest_min" min="1" max="5" value="{{ f.interest_min if f.interest_min is not none else '' }}"></label>
+    <label>年収上限 ≥ <input type="number" name="salary_min" min="0" step="50" value="{{ f.salary_min if f.salary_min is not none else '' }}"> 万円</label>
+    <label>出社 ≤ 週 <input type="number" name="office_days_max" min="0" max="7" step="0.25" value="{{ f.office_days_max if f.office_days_max is not none else '' }}"> 日</label>
+  </div>
+  <fieldset>
+    <legend>働き方</legend>
+    <div class="chips">{{ checkbox_group('remote_type', remote_options, f.remote_types) }}</div>
+  </fieldset>
+  <fieldset>
+    <legend>直近アクション</legend>
+    <div class="chips">{{ checkbox_group('action_type', action_options, f.action_types) }}</div>
+  </fieldset>
+  <noscript><button type="submit">絞り込む</button></noscript>
+  <a class="small" href="/companies?track=">すべて表示</a> ·
+  <a class="small" href="/companies">進行中だけに戻す</a>
+</form>
+<div id="results">{% include "companies/_table.html" %}</div>
+{% endblock %}

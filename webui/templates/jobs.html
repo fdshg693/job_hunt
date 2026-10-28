@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import checkbox_group with context %}
+{% block title %}求人{% endblock %}
+{% block content %}
+<h1>取得済みの求人 <span class="count">{{ total }}</span></h1>
+<p class="muted">各媒体から取得した <code>data/*/jobs</code> のスナップショット。年収は万円に換算して表示する。</p>
+<form class="filters" action="/jobs" method="get" hx-get="/jobs" hx-target="#results" hx-push-url="true"
+      hx-trigger="change, input changed delay:300ms from:input[type=search], input changed delay:400ms from:input[type=number]">
+  <div class="filter-row">
+    <input type="search" name="q" value="{{ f.q or '' }}" placeholder="タイトル・社名・本文を検索" class="grow" aria-label="検索">
+    <label>スキル
+      <input list="skill-list" name="skill" value="{{ f.skill or '' }}" size="12">
+      <datalist id="skill-list">{% for s in skills %}<option value="{{ s.skill }}">{{ s.skill }} ({{ s.n }})</option>{% endfor %}</datalist>
+    </label>
+    <label>年収上限 ≥ <input type="number" name="salary_min" min="0" step="50" value="{{ f.salary_min if f.salary_min is not none else '' }}"> 万円</label>
+    <label class="chip"><input type="checkbox" name="has_log" value="1" {% if f.has_log %}checked{% endif %}> 企業ログがある会社だけ</label>
+  </div>
+  <fieldset><legend>媒体</legend><div class="chips">{{ checkbox_group('source', source_options, f.sources) }}</div></fieldset>
+  <fieldset><legend>働き方</legend><div class="chips">{{ checkbox_group('remote_type', remote_options, f.remote_types) }}</div></fieldset>
+  <noscript><button type="submit">絞り込む</button></noscript>
+</form>
+<div id="results">{% include "_jobs_table.html" %}</div>
+{% endblock %}

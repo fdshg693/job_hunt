@@ -1,0 +1,125 @@
+# 定期実行エージェントルーチンの定義（雛形）
+#
+# 使い方: このファイルを vault/automation/routines.yaml にコピーして書き換える（vault 側は非公開）。
+#   検査:   uv run python scripts/automation/run_routine.py validate --summary
+# キー・型の正は scripts/automation/config.py。未知のキーはエラーになる（打ち間違いを黙って無視しない）。
+#
+# プレースホルダ（{{...}}）: agent ステップの prompt / prompt_file と script ステップの引数で使える。
+#   {{today}} {{tomorrow}} {{now}} {{routine}} {{run_dir}}
+#   {{steps.<id>.output}}  前段のステップの出力（script: capture の内容 / agent: 応答）
+#   {{steps.<id>.status}}  前段のステップの結果（succeeded / failed / skipped）
+#   参照できるのは同じルーチンの「前段」のステップだけ。defaults.preamble ではステップ参照は使えない。
+#
+# 個人の値（社名・年収・氏名など）はこの雛形に書かない。vault 側のコピーにだけ書く。
+
+version: 1
+
+defaults:
+  agent: claude          # agent ステップの既定 CLI（claude / agy）
+  timeout_minutes: 15    # ステップの既定タイムアウト（分）
+  # 全 agent ステップのプロンプト先頭に付く、無人実行の約束
+  preamble: |
+    これは定期実行による無人実行です。ユーザーはこの場にいないので、質問や確認はできません。
+    - 外部への送信・返信、求人媒体のプロフィール更新、カレンダーへの登録・変更、git のコミット・push は行わない。
+    - 許可されていない操作が拒否されたら、迂回せず「ユーザーがやること」として返す。
+    - ログインや認証が切れていたら、どこへのログインが必要かを「ユーザーがやること」として返す。
+    - ユーザーの判断が要るもの（返信・応募・日程の確定など）は自分で決めず、判断材料を添えて返す。
+    - 推測で事実を埋めない。確かめられなかったことは「未確認」と書く。
+    実行日: {{today}}（開始 {{now}}）
+
+agents:
+  claude:
+    # command: claude          # 実行ファイル（省略時は PATH の claude）
+    # extra_args: []           # 毎回付ける追加引数
+    model: sonnet              # 既定モデル。軽い要約のステップは haiku に上書きしてよい
+    # effort: medium           # low / medium / high / xhigh / max
+    max_budget_usd: 1.0        # 1 ステップの費用上限（推定コストで止まる）
+    permission_profiles:
+      # writes: 書き込む範囲（none / data / vault）。vault は作業ツリーに未コミット変更が無いときだけ実行される
+      read_only:
+        writes: none
+        tools: [Read, Grep, Glob]
+      write_data:              # data/ に取得結果を保存するスクリプトを使う
+        writes: data
+        tools: [Read, Grep, Glob, Bash]
+        allow:
+          - Bash(uv run python scripts/gmail/search_messages.py *)
+          - Bash(uv run python scripts/gmail/fetch_thread.py *)
+          - Bash(uv run python scripts/gcal/list_events.py *)
+          - Bash(uv run python scripts/vault/find_chores.py *)
+        deny:
+          - Bash(uv run python scripts/gcal/manage_events.py *)
+          - Bash(git commit *)
+          - Bash(git push *)
+  agy:
+    # agy は実行ごとに許可ルールを渡せない。allow / deny は ~/.gemini/antigravity-cli/settings.json に
+    # 入っているべきルールの宣言で、足りなければブリーフで知らせる（settings.json は書き換えない）。
+    model: gemini-3.8-flash-medium
+    permission_profiles:
+      read_only:
+        writes: none
+      write_data:
+        writes: data
+        allow:
+          - command(regex:uv run python scripts/(gmail|gcal|vault)/.*)
+        deny:
+          - command(regex:uv run python scripts/gcal/manage_events\.py.*)
+
+routines:
+  - id: morning-brief
+    description: 雑務・メール・予定を確かめて、今日ユーザーがやることをまとめる
+    enabled: true
+    schedule:
+      daily_at: ["08:30"]      # 時刻は引用符で囲む（8:30 は 60 進数の整数と読まれる）
+      # weekdays: [mon, tue, wed, thu, fri]   # 省略時は毎日
+      on_logon: true           # 朝 PC をつけた時点でも起動する
+      once_per_day: true       # 同じ日の 2 回目以降は何もしない
+    steps:
+      - id: chores
+        kind: script
+        run: [scripts/vault/find_chores.py, --json]
+        capture: stdout        # stdout: 標準出力そのもの / file: 標準出力に出たパスのファイル内容
+
+      - id: mail
+        kind: script
+        run: [scripts/gmail/search_messages.py, --since, 2d, -n, "20"]
+        capture: file
+        on_failure: continue   # 認証切れ（終了コード 2）でも後続は続け、ブリーフにログインを載せる
+
+      - id: events
+        kind: script
+        run: [scripts/gcal/list_events.py, --since, "{{today}}", --until, "{{tomorrow}}"]
+        capture: file
+        on_failure: continue
+
+      # 条件付きステップの例: メールがあったときだけ、軽いモデルで要対応を仕分ける
+      # - id: mail_triage
+      #   kind: agent
+      #   when: {if_nonempty: mail}   # if_nonempty / if_empty / if_succeeded / if_failed のどれか 1 つ
+      #   model: haiku
+      #   permission: read_only
+      #   prompt: |
+      #     次のメール一覧から、返信・日程調整・結果確認が要るものだけを挙げてください。
+      #     {{steps.mail.output}}
+
+      - id: brief
+        kind: agent
+        permission: read_only
+        # 長いプロンプトは vault 相対のファイルに出せる: prompt_file: automation/prompts/morning-brief.md
+        prompt: |
+          以下の材料と vault/tracks/*/pipeline.md を読み、今日ユーザーがやるべき作業を優先度順に挙げてください。
+          期限が今日・明日のもの、相手を待たせているもの、取り消しにくい判断が要るものを上位にします。
+          材料の取得に失敗したもの（status が failed）は、その原因の解消（ログイン等）をタスクに含めます。
+
+          ## 雑務（find_chores.py の結果。status: {{steps.chores.status}}）
+          {{steps.chores.output}}
+
+          ## 直近 2 日のメール（status: {{steps.mail.status}}）
+          {{steps.mail.output}}
+
+          ## 今日・明日の予定（status: {{steps.events.status}}）
+          {{steps.events.output}}
+
+    brief:
+      step: brief              # ブリーフを返す agent ステップ（出力スキーマは実行エンジンが付ける）
+      notify: true             # できたらトースト通知する

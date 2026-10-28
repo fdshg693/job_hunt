@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import checkbox_group with context %}
+{% block title %}見送り台帳{% endblock %}
+{% block content %}
+<h1>見送り台帳</h1>
+<p class="muted">見送り・不合格から時間が経った企業を 1 社数行に圧縮したもの（<code>vault/tracks/{track}/archive.md</code>）。同じ track では <code>check_company.py</code> が除外扱いにする（ブラックリストは全 track）。</p>
+<form class="filters" action="/archive" method="get" hx-get="/archive" hx-target="#results" hx-push-url="true"
+      hx-trigger="change, input changed delay:300ms from:input[type=search]">
+  <div class="filter-row">
+    <input type="search" name="q" value="{{ query.get('q', '') }}" placeholder="社名・理由・再検討条件を検索" class="grow" aria-label="検索">
+    <label>track
+      <select name="track">
+        <option value="">すべて</option>
+        {% for value, lbl in track_options %}<option value="{{ value }}" {% if track == value %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+      </select>
+    </label>
+    {% if query.get('key') %}<input type="hidden" name="key" value="{{ query.get('key') }}"><a class="small" href="/archive">企業の絞り込みを外す</a>{% endif %}
+  </div>
+  <fieldset><legend>種別</legend><div class="chips">{{ checkbox_group('status', archived_status_options, statuses) }}</div></fieldset>
+  <noscript><button type="submit">絞り込む</button></noscript>
+</form>
+<div id="results">{% include "_archive_table.html" %}</div>
+{% endblock %}

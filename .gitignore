@@ -1,0 +1,32 @@
+data/
+
+__pycache__/
+*.pyc
+
+.venv/
+
+.pytest_cache/
+
+*.env
+.env
+
+# temp
+temp
+
+node_modules/
+
+# 一時作業ファイル（調査スクリプト・メモ等）
+.scratch/
+
+.playwright-cli/
+
+# Deploy Keys / SSH Keys
+sync_deploy_key*
+*.pem
+# Claude Code の個人設定
+.claude/settings.local.json
+
+*.pdf
+# Google OAuth 認証情報（Gmail・Calendar 共通。正規の置き場所はリポジトリ外の %LOCALAPPDATA%\job-hunt\google\。誤配置の保険）
+client_secret*.json
+token*.json

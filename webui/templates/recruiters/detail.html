@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge with context %}
+{% block title %}{{ r.name }}{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/recruiters">リクルーター</a></p>
+<div class="title-row">
+  <h1>{{ r.name }}</h1>
+  <span class="badge rating-{{ r.rating }}" title="{{ label(Rating, r.rating) }}">{{ r.rating }}</span>
+  <span class="badge">{{ r.status_label }}</span>
+  <a class="ghost-link small" href="{{ vscode_url(r.path) }}">VS Code で開く</a>
+</div>
+
+<div class="facts">
+  <section class="card">
+    <h2>基本情報</h2>
+    <dl>
+      {% if r.agency %}<dt>所属</dt><dd>{{ r.agency }}</dd>{% endif %}
+      <dt>媒体</dt><dd>{{ r.platform_label }}{% if model.platform_user_id %}（{% if model.platform_user_id.startswith('http') %}<a href="{{ model.platform_user_id }}" target="_blank" rel="noopener noreferrer">プロフィール</a>{% else %}{{ model.platform_user_id }}{% endif %}）{% endif %}</dd>
+      <dt>track</dt><dd>{{ r.tracks.replace(',', ', ') }}</dd>
+      <dt>初回 / 更新</dt><dd>{{ r.date }} / {{ r.updated_at }}</dd>
+    </dl>
+  </section>
+  <section class="card">
+    <h2>評価</h2>
+    <dl>
+      <dt>総合評価</dt><dd>{{ r.rating }}（{{ label(Rating, r.rating) }}）</dd>
+      <dt>マッチング精度</dt><dd>{{ label(MatchingAccuracy, r.matching_accuracy) or '-' }}</dd>
+      <dt>コミュニケーション</dt><dd>{{ r.communication_quality or '-' }}</dd>
+      <dt>足切り条件の尊重</dt><dd>{% if r.dealbreaker_adherence is none %}-{% elif r.dealbreaker_adherence %}している{% else %}していない{% endif %}</dd>
+    </dl>
+    {% if model.tags %}<div class="tags">{% for t in model.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>{% endif %}
+  </section>
+</div>
+
+<section class="card">
+  <h2>紹介企業 <span class="count">{{ companies | length }}</span></h2>
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>企業</th><th>紹介日</th><th>職種</th><th>ステータス</th><th>fit</th><th>年収</th><th>メモ</th></tr></thead>
+    <tbody>
+    {% for c in companies %}
+      <tr>
+        <td>{% if c.company_id %}<a href="{{ links.company_url(c.track, c.company_key) }}">{{ c.company }}</a>{% elif c.archive_id %}<a href="{{ links.archive_url(c.archive_track, c.archive_key) }}">{{ c.introduced_name }}</a>{% else %}{{ c.introduced_name }}{% endif %}</td>
+        <td class="nowrap">{{ c.introduced_date or '' }}</td>
+        <td class="clip">{{ c.introduced_title or '' }}</td>
+        <td>{% if c.company_id %}{{ status_badge(c) }}{% elif c.archive_id %}<span class="badge">{{ c.archive_status_label }}</span> <span class="muted small">台帳 {{ c.archive_closed_at }}</span>{% else %}<span class="muted">企業ログなし</span>{% endif %}</td>
+        <td class="num">{% if c.archive_id %}{{ display.format_fit(c.archive_fit_min, c.archive_fit_max) }}{% else %}{{ display.format_fit(c.fit_score_min, c.fit_score_max) }}{% endif %}</td>
+        <td class="nowrap">{{ display.format_salary(c.salary_min, c.salary_max) }}</td>
+        <td class="clip">{{ c.note or '' }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">なし</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+{% if model.links %}
+<section class="card">
+  <h2>参考リソース・資料リンク <span class="count">{{ model.links | length }}</span></h2>
+  <ul class="resource-links">
+    {% for l in model.links %}
+    <li class="resource-link-item">
+      <div class="resource-link-header">
+        <span class="badge link-cat-{{ l.category }}">{{ label_of(l.category) }}</span>
+        <a href="{{ l.url }}" target="_blank" rel="noopener noreferrer" class="resource-link-title">{{ l.title }}</a>
+        {% if l.material %}
+        {% set mat_stem = l.material.split('/')[-1].removesuffix('.md') %}
+        {% set mat = materials | selectattr('material_rel', 'equalto', l.material) | first %}
+        <a href="#mat-{{ mat_stem }}" class="badge material-badge" data-tab-jump="mat-{{ mat_stem }}">📄 資料を開く</a>
+        {% if mat and mat.fetched_at %}<span class="muted small" title="資料の要約を書いた・見直した日">要約 {{ mat.fetched_at }}</span>{% endif %}
+        {% elif l.fetched_at %}<span class="muted small">{{ l.fetched_at }}</span>{% endif %}
+      </div>
+      {% if l.summary %}
+      <p class="resource-link-summary muted">{{ l.summary }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<div class="tabs" data-tabs>
+  <div class="tab-list" role="tablist">
+    <button role="tab" data-tab="log" aria-selected="true">評価ログ</button>
+    {% for mat in materials %}
+    <button role="tab" data-tab="{{ mat.anchor }}" aria-selected="false">📄 {{ mat.title }}</button>
+    {% endfor %}
+    {% for iv in interviews %}
+    <button role="tab" data-tab="{{ iv.anchor }}" aria-selected="false">{{ iv.stage_label }} <span class="muted">{{ iv.date }}</span></button>
+    {% endfor %}
+  </div>
+  <article class="tab-panel markdown" id="log" role="tabpanel">{{ body }}</article>
+  {% for mat in materials %}
+  <article class="tab-panel markdown" id="{{ mat.anchor }}" role="tabpanel" hidden>
+    <p class="muted small">
+      資料: {{ mat.title }}
+      {% if mat.fetched_at %} · 要約 {{ mat.fetched_at }}{% endif %}
+      {% if mat.raw_fetched_at %} · 生データ取得 {{ mat.raw_fetched_at }}{% endif %}
+      {% if mat.source_url %} · <a href="{{ mat.source_url }}" target="_blank" rel="noopener noreferrer">元資料</a>{% endif %}
+      · <a href="{{ vscode_url(mat.path) }}">VS Code で開く</a>
+    </p>
+    {{ mat.body }}
+  </article>
+  {% endfor %}
+  {% for iv in interviews %}
+  <article class="tab-panel markdown" id="{{ iv.anchor }}" role="tabpanel" hidden>
+    <p class="muted small">{{ iv.date }} · {{ iv.stage_label }} · <a href="{{ vscode_url(iv.path) }}">VS Code で開く</a></p>
+    {{ iv.body }}
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

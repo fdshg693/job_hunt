@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from "_macros.html" import checkbox_group with context %}
+{% block title %}リクルーター{% endblock %}
+{% block content %}
+<h1>リクルーター</h1>
+<form class="filters" action="/recruiters" method="get" hx-get="/recruiters" hx-target="#results" hx-push-url="true"
+      hx-trigger="change, input changed delay:300ms from:input[type=search]">
+  <div class="filter-row"><input type="search" name="q" value="{{ query.get('q', '') }}" placeholder="氏名・所属・紹介企業を検索" class="grow" aria-label="検索"></div>
+  <fieldset><legend>評価</legend><div class="chips">{{ checkbox_group('rating', rating_options, ratings) }}</div></fieldset>
+  <fieldset><legend>状態</legend><div class="chips">{{ checkbox_group('status', recruiter_status_options, statuses) }}</div></fieldset>
+  <noscript><button type="submit">絞り込む</button></noscript>
+</form>
+<div id="results">{% include "recruiters/_table.html" %}</div>
+{% endblock %}

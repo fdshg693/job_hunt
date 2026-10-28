@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}vault{% endblock %} · job-hunt</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/htmx.min.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/">job-hunt</a>
+  <nav>
+    <a href="/" {% if request.url.path == '/' %}aria-current="page"{% endif %}>ダッシュボード</a>
+    <a href="/companies" {% if request.url.path.startswith('/companies') %}aria-current="page"{% endif %}>企業</a>
+    <a href="/recruiters" {% if request.url.path.startswith('/recruiters') %}aria-current="page"{% endif %}>リクルーター</a>
+    <a href="/screening" {% if request.url.path.startswith('/screening') %}aria-current="page"{% endif %}>スクリーニング</a>
+    <a href="/archive" {% if request.url.path.startswith('/archive') %}aria-current="page"{% endif %}>見送り台帳</a>
+    <a href="/jobs" {% if request.url.path.startswith('/jobs') %}aria-current="page"{% endif %}>求人</a>
+  </nav>
+  <form class="global-search" action="/search" method="get">
+    <input type="search" name="q" placeholder="全体を検索" value="{{ q or '' }}" aria-label="全体を検索">
+  </form>
+  <form action="/reindex" method="post">
+    <button type="submit" class="ghost" title="vault と data/*/jobs から索引を作り直す（通常は自動）">索引を再構築</button>
+  </form>
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>

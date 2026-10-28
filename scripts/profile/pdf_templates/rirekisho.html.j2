@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>履歴書 - {{ name }}</title>
+<style>{{ css }}</style>
+</head>
+<body>
+<section class="sheet">
+  <div class="sheet-head">
+    <h1>履　歴　書</h1>
+    <div class="as-of">{{ as_of }}</div>
+  </div>
+
+  <table class="personal">
+    <colgroup><col class="c-label"><col><col class="c-label"><col class="c-gender"></colgroup>
+    <tr class="kana"><th>ふりがな</th><td colspan="3">{{ name_kana }}</td></tr>
+    <tr class="name"><th>氏　名</th><td colspan="3">{{ name }}</td></tr>
+    <tr>
+      <th>生年月日</th><td>{{ birth }}</td>
+      <th>性別</th><td class="center">{{ gender }}</td>
+    </tr>
+    <tr class="kana"><th>ふりがな</th><td colspan="3">{{ address_kana }}</td></tr>
+    <tr class="address">
+      <th>現住所</th>
+      <td colspan="3">〒{{ postal_code }}<br>{{ address }}</td>
+    </tr>
+    <tr>
+      <th>電話</th><td>{{ phone }}</td>
+      <th>E-mail</th><td>{{ email }}</td>
+    </tr>
+    <tr class="address">
+      <th>連絡先</th>
+      <td colspan="3"><span class="hint">（現住所以外に連絡を希望する場合のみ記入）</span><br>同上</td>
+    </tr>
+  </table>
+
+  <table class="rows history">
+    <colgroup><col class="c-year"><col class="c-month"><col></colgroup>
+    <tr><th>年</th><th>月</th><th>学歴・職歴</th></tr>
+    {% for row in history %}
+    <tr>
+      <td class="center">{{ row.year }}</td>
+      <td class="center">{{ row.month }}</td>
+      <td class="{{ row.cls }}">{{ row.text }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section class="sheet">
+  <table class="rows licenses">
+    <colgroup><col class="c-year"><col class="c-month"><col></colgroup>
+    <tr><th>年</th><th>月</th><th>免許・資格</th></tr>
+    {% for row in licenses %}
+    <tr>
+      <td class="center">{{ row.year }}</td>
+      <td class="center">{{ row.month }}</td>
+      <td>{{ row.text }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <div class="box motivation">
+    <div class="box-title">志望の動機、特技、好きな学科、アピールポイントなど</div>
+    <div class="box-body">{{ motivation }}</div>
+  </div>
+
+  <div class="box wishes">
+    <div class="box-title">本人希望記入欄（特に給料・職種・勤務時間・勤務地・その他についての希望などがあれば記入）</div>
+    <div class="box-body">{{ wishes }}</div>
+  </div>
+</section>
+</body>
+</html>

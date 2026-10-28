@@ -1,0 +1,22 @@
+<p class="result-count">{{ rows | length }} 人</p>
+<div class="table-wrap">
+<table class="data">
+  <thead><tr><th>担当者</th><th>評価</th><th>状態</th><th>媒体</th><th>マッチング精度</th><th>紹介企業</th><th>track</th><th>更新日</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr>
+      <td><a href="{{ links.recruiter_url(r.recruiter_key) }}">{{ r.name }}</a>{% if r.agency %}<div class="note">{{ r.agency }}</div>{% endif %}</td>
+      <td><span class="badge rating-{{ r.rating }}">{{ r.rating }}</span></td>
+      <td>{{ r.status_label }}</td>
+      <td>{{ r.platform_label }}</td>
+      <td>{{ label(MatchingAccuracy, r.matching_accuracy) or '-' }}</td>
+      <td class="num">{{ r.n_companies }}</td>
+      <td>{{ r.tracks.replace(',', ', ') }}</td>
+      <td class="nowrap">{{ r.updated_at }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">条件に合うリクルーターはいない</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>

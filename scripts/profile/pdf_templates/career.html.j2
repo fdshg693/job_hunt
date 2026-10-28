@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>{{ labels.title }} - {{ name }}</title>
+<style>{{ css }}</style>
+</head>
+<body class="lang-{{ lang }}">
+<header class="doc-header">
+  {% if lang == "ja" %}
+  <h1 class="doc-title">{{ labels.title }}</h1>
+  <div class="doc-meta">
+    <div>{{ as_of }}</div>
+    <div class="doc-name">氏名　{{ name }}{% if name_sub %}<span class="name-sub">（{{ name_sub }}）</span>{% endif %}</div>
+  </div>
+  {% else %}
+  <h1 class="doc-name-en">{{ name }}</h1>
+  <div class="doc-meta-en">
+    {% if location %}<span>{{ location }}</span>{% endif %}
+    {% for link in links %}<span><a href="{{ link.url }}">{{ link.url | replace("https://", "") }}</a></span>{% endfor %}
+    {% if contact and contact.email %}<span>{{ contact.email }}</span>{% endif %}
+    {% if contact and contact.phone %}<span>{{ contact.phone }}</span>{% endif %}
+  </div>
+  {% endif %}
+</header>
+
+{% if lang == "ja" and (links or contact) %}
+<dl class="facts">
+  {% if contact %}
+  <dt>{{ labels.contact }}</dt>
+  <dd>{% if contact.email %}{{ contact.email }}{% endif %}{% if contact.email and contact.phone %}　/　{% endif %}{% if contact.phone %}{{ contact.phone }}{% endif %}</dd>
+  {% endif %}
+  {% if links %}
+  <dt>リンク</dt>
+  <dd>{% for link in links %}<a href="{{ link.url }}">{{ link.label }}: {{ link.url | replace("https://", "") }}</a>{% if not loop.last %}　/　{% endif %}{% endfor %}</dd>
+  {% endif %}
+</dl>
+{% endif %}
+
+{% for section in sections %}
+<section class="body-section">
+  <h2>{{ section.heading }}</h2>
+  {{ section.html }}
+</section>
+{% if loop.first %}
+{# 職務要約の直後にスキル・資格・語学をまとめて置く #}
+<section class="body-section">
+  <h2>{{ labels.skills }}</h2>
+  {% if skills %}<ul class="chips">{% for s in skills %}<li>{{ s }}</li>{% endfor %}</ul>{% endif %}
+  <dl class="facts">
+    {% if certifications %}<dt>{{ labels.certifications }}</dt><dd>{{ certifications | join(" / ") }}</dd>{% endif %}
+    {% if language %}<dt>{{ labels.language }}</dt><dd>{{ language }}</dd>{% endif %}
+  </dl>
+</section>
+{% endif %}
+{% endfor %}
+</body>
+</html>

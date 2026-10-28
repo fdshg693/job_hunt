@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}検索{% endblock %}
+{% block content %}
+<h1>検索</h1>
+<form class="filters" action="/search" method="get">
+  <div class="filter-row"><input type="search" name="q" value="{{ q or '' }}" placeholder="企業・面談・リクルーター・スクリーニング・求人をまとめて検索" class="grow" autofocus aria-label="検索"></div>
+</form>
+{% if q %}
+  <p class="result-count">「{{ q }}」: {{ groups.values() | map('length') | sum }} 件</p>
+  {% for kind, hits in groups.items() if hits %}
+  <section class="card">
+    <h2>{{ titles[kind] }} <span class="count">{{ hits | length }}</span></h2>
+    <ul class="hit-list">
+      {% for h in hits %}
+      <li>{% if h.url %}<a href="{{ h.url }}">{{ h.hit.title }}</a>{% else %}{{ h.hit.title }}{% endif %}
+        {% if h.hit.track %}<span class="badge track">{{ h.hit.track }}</span>{% endif %}
+        <span class="muted small">{{ h.hit.path }}</span></li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endfor %}
+{% endif %}
+{% endblock %}

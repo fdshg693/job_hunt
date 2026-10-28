@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, company_link, track_badge with context %}
+{% block title %}ダッシュボード{% endblock %}
+{% block content %}
+<h1>ダッシュボード</h1>
+
+{% if issues %}
+<details class="notice">
+  <summary>検証エラー・警告のあるファイル: {{ issues | length }} 件（<code>uv run python scripts/vault/validate.py --summary</code> で確認）</summary>
+  <ul>
+  {% for i in issues %}<li><span class="badge level-{{ i.level }}">{{ i.level }}</span> <code>{{ i.path }}</code> {{ i.message }}</li>{% endfor %}
+  </ul>
+</details>
+{% endif %}
+
+<div class="action-grid">
+{% for action, items in sections %}
+<section class="card">
+  <h2>{{ label_of(action) }} <span class="count">{{ items | length }}</span></h2>
+  {% if items %}
+  <ul class="action-list">
+    {% for c in items %}
+    <li>
+      <div class="action-head">{{ company_link(c) }} {{ status_badge(c) }}{% if c.track != 'domestic' %} {{ track_badge(c.track) }}{% endif %}</div>
+      <div class="action-body">{{ c.next_action or '（next_action 未記入）' }}</div>
+      {% if c.next_due %}<div class="due {% if c.next_due[:10] < today %}overdue{% endif %}">{{ c.next_due }}</div>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">なし</p>
+  {% endif %}
+</section>
+{% endfor %}
+</div>
+
+<section class="card">
+  <h2>ステータス別の件数</h2>
+  <div class="count-tables">
+  {% for t in tracks %}
+    <table class="compact">
+      <caption>{{ label_of(Track(t)) }}</caption>
+      <tbody>
+      {% for c in counts if c.track == t %}
+        <tr>
+          <td><a href="/companies?track={{ t }}&status={{ c.status }}"><span class="badge cat-{{ c.status_category }}">{{ c.status_label }}</span></a></td>
+          <td class="num">{{ c.n }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>最近更新した企業</h2>
+  <table>
+    <thead><tr><th>企業</th><th>ステータス</th><th>状況メモ</th><th>更新日</th></tr></thead>
+    <tbody>
+    {% for c in recent %}
+      <tr>
+        <td>{{ company_link(c) }}{% if c.track != 'domestic' %} {{ track_badge(c.track) }}{% endif %}</td>
+        <td>{{ status_badge(c) }}</td>
+        <td class="clip">{{ c.status_note or '' }}</td>
+        <td class="nowrap">{{ c.updated_at }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<p class="muted small">索引の作成: {{ meta.built_at }}</p>
+{% endblock %}

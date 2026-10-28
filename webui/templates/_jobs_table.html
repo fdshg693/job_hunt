@@ -1,0 +1,21 @@
+<p class="result-count">{{ rows | length }} 件{% if rows | length >= f.limit %}（先頭 {{ f.limit }} 件まで表示）{% endif %}</p>
+<div class="table-wrap">
+<table class="data">
+  <thead><tr><th>求人</th><th>企業</th><th>年収</th><th>働き方</th><th>スキル</th><th>媒体</th><th>取得日</th></tr></thead>
+  <tbody>
+  {% for j in rows %}
+    <tr>
+      <td><a href="{{ links.ui_url(j.path) }}">{{ j.title }}</a></td>
+      <td>{{ j.company }}{% if j.company_id %} <a class="badge cat-{{ j.company_status_category }}" href="{{ links.company_url(j.company_track, j.company_key) }}" title="企業ログあり">{{ j.company_status_label }}</a>{% endif %}</td>
+      <td class="nowrap">{{ display.format_salary(j.salary_min, j.salary_max) }}</td>
+      <td class="nowrap" title="{{ j.remote_text or '' }}">{{ label(RemoteType, j.remote_type) if j.remote_type != 'unknown' else '' }}</td>
+      <td><div class="tags">{% for s in (j.skills.split(',') if j.skills else [])[:6] %}<span class="tag">{{ s }}</span>{% endfor %}</div></td>
+      <td>{{ j.source }}</td>
+      <td class="nowrap">{{ (j.fetched_at or '')[:10] }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7" class="muted">条件に合う求人はない</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>

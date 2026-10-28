@@ -1,0 +1,49 @@
+{% from "_macros.html" import status_badge, company_link, track_badge, sort_header with context %}
+{# 並べ替え状態はフォームの外（この部分テンプレート）に置き、見出しクリックの部分更新でも値が追従するようにする #}
+<input type="hidden" name="sort" value="{{ f.sort }}" form="company-filters">
+<input type="hidden" name="dir" value="{{ f.dir }}" form="company-filters">
+<p class="result-count">{{ rows | length }} 社</p>
+<div class="table-wrap">
+<table class="data">
+  <thead>
+    <tr>
+      {{ sort_header('company', '企業', f) }}
+      {{ sort_header('status', 'ステータス', f) }}
+      <th>職種</th>
+      {{ sort_header('salary', '年収', f) }}
+      {{ sort_header('office', '働き方', f) }}
+      {{ sort_header('fit', 'fit', f) }}
+      {{ sort_header('interest', '志望度', f) }}
+      {{ sort_header('due', '次回アクション', f) }}
+      {{ sort_header('updated', '更新日', f) }}
+    </tr>
+  </thead>
+  <tbody>
+  {% for c in rows %}
+    <tr>
+      <td>
+        {{ company_link(c) }}{% if c.track != 'domestic' %} {{ track_badge(c.track) }}{% endif %}
+        {% set tags = tags_by_id.get(c.id, []) %}
+        {% if tags %}<div class="tags">{% for t in tags[:6] %}<a class="tag" href="/companies{{ with_query(query, tag=t) }}">{{ t }}</a>{% endfor %}{% if tags | length > 6 %}<span class="muted">+{{ tags | length - 6 }}</span>{% endif %}</div>{% endif %}
+      </td>
+      <td>{{ status_badge(c) }}{% if c.status_note %}<div class="note clip" title="{{ c.status_note }}">{{ c.status_note }}</div>{% endif %}</td>
+      <td class="clip" title="{{ c.job_title or '' }}">{{ c.job_title or '' }}</td>
+      <td class="nowrap">{{ display.format_salary(c.salary_min, c.salary_max) }}</td>
+      <td class="nowrap">{{ display.format_remote(c.remote_type, c.office_days_per_week) }}</td>
+      <td class="nowrap num">{{ display.format_fit(c.fit_score_min, c.fit_score_max) }}</td>
+      <td class="nowrap stars">{{ display.format_interest(c.interest) }}</td>
+      <td>
+        {% if c.action_type != 'none' %}
+        <span class="badge action-{{ c.action_type }}">{{ label_of(ActionType(c.action_type)) }}</span>
+        <div class="note">{{ c.next_action or '' }}</div>
+        {% if c.next_due %}<div class="due">{{ c.next_due }}</div>{% endif %}
+        {% endif %}
+      </td>
+      <td class="nowrap">{{ c.updated_at }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="9" class="muted">条件に合う企業はない</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>

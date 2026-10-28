@@ -1,0 +1,63 @@
+{
+  "source": "forkwell",
+  "success": true,
+  "fetchedAt": "2026-10-24T00:00:00Z",
+  "url": "https://jobs.forkwell.com/inbox",
+  "tab": "active",
+  "tab_label": "スカウト・やりとり",
+  "totalCount": 2,
+  "messages": [
+    {
+      "id": "fw_msg_001",
+      "company": "Acme Digital Inc.",
+      "company_icon": "https://example.com/icons/acme.png",
+      "subject": "【特別スカウト】シニアバックエンドエンジニアのご提案",
+      "status_text": "返信期限: あと5日",
+      "badges": [
+        "スカウト",
+        "面談確約"
+      ],
+      "scout_type": "スカウト",
+      "url": "https://jobs.forkwell.com/messages/1001",
+      "job_url": "https://jobs.forkwell.com/jobs/2001",
+      "job_title": "シニアバックエンドエンジニア",
+      "snippet": "ご経歴を拝見し、弊社のマイクロサービス刷新プロジェクトをリードいただける方を募集しております...",
+      "body": "ご担当者様\n\nはじめまして。Acme Digital Inc. 採用担当の佐藤と申します。\nGitHubおよび職務経歴でのご活躍を拝見し、ぜひ一度カジュアルにお話ししたくご連絡いたしました。\n\n【ポジション】シニアバックエンドエンジニア\n【想定年収】850万〜1200万円\n【勤務形態】フルリモート可",
+      "deadline": "2026-10-31",
+      "extra_metadata": {
+        "badges": [
+          "スカウト",
+          "面談確約"
+        ],
+        "statusText": "返信期限: あと5日",
+        "jobTitle": "シニアバックエンドエンジニア",
+        "jobSalary": "850万円〜1,200万円",
+        "jobRole": "バックエンドエンジニア"
+      }
+    },
+    {
+      "id": "fw_msg_002",
+      "company": "Beta Cloud Services 株式会社",
+      "company_icon": "",
+      "subject": "技術スタックについてカジュアルにお話ししませんか？",
+      "status_text": "2026/10/22",
+      "badges": [
+        "話を聞いてみたい"
+      ],
+      "scout_type": "話を聞いてみたい",
+      "url": "https://jobs.forkwell.com/messages/1002",
+      "job_url": null,
+      "job_title": null,
+      "snippet": "弊社プロダクトの開発基盤について情報交換させていただけますと幸いです...",
+      "body": "こんにちは！Beta Cloud ServicesのCTOをしております田中です。\n弊社では現在GoとKubernetesを使ったアーキテクチャへの刷新を進めており...",
+      "deadline": null,
+      "extra_metadata": {
+        "badges": [
+          "話を聞いてみたい"
+        ],
+        "statusText": "2026/10/22"
+      }
+    }
+  ],
+  "errors": []
+}

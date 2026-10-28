@@ -1,0 +1,26 @@
+{% macro status_badge(row) -%}
+<span class="badge cat-{{ row.status_category }}" title="{{ status_meta[row.status].description if row.status in status_meta else '' }}">{{ row.status_label }}</span>
+{%- endmacro %}
+
+{% macro company_link(row) -%}
+<a href="{{ links.company_url(row.track, row.company_key) }}">{{ row.company }}</a>
+{%- endmacro %}
+
+{% macro track_badge(track) -%}
+<span class="badge track" title="{{ label_of(Track(track)) }}">{{ track }}</span>
+{%- endmacro %}
+
+{% macro checkbox_group(name, options, selected) -%}
+{% for opt in options %}
+<label class="chip"><input type="checkbox" name="{{ name }}" value="{{ opt[0] }}" {% if opt[0] in selected %}checked{% endif %}> {{ opt[1] }}</label>
+{% endfor %}
+{%- endmacro %}
+
+{% macro sort_header(key, label, f) -%}
+{% set active = f.sort == key %}
+{% set next_dir = 'desc' if active and f.dir == 'asc' else 'asc' %}
+<th aria-sort="{{ ('ascending' if f.dir == 'asc' else 'descending') if active else 'none' }}">
+  <a href="/companies{{ with_query(query, sort=key, dir=next_dir) }}"
+     hx-get="/companies{{ with_query(query, sort=key, dir=next_dir) }}" hx-target="#results" hx-push-url="true">{{ label }}{% if active %} {{ '▲' if f.dir == 'asc' else '▼' }}{% endif %}</a>
+</th>
+{%- endmacro %}

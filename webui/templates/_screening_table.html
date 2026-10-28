@@ -1,0 +1,19 @@
+<p class="result-count">{{ rows | length }} 社</p>
+<div class="table-wrap">
+<table class="data">
+  <thead><tr><th>企業</th><th>理由</th><th>バッチ</th><th>日付</th><th>track</th></tr></thead>
+  <tbody>
+  {% for s in rows %}
+    <tr>
+      <td>{{ s.name }}{% if s.aliases %}<div class="note">{{ s.aliases.replace(',', ' / ') }}</div>{% endif %}</td>
+      <td>{{ s.reason }}</td>
+      <td><a href="/screening{{ with_query(query, batch=s.path) }}">{{ s.topic }}</a></td>
+      <td class="nowrap">{{ s.batch_date }}</td>
+      <td>{{ s.track }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="muted">該当なし</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>

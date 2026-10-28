@@ -1,0 +1,56 @@
+{
+  "props": {
+    "pageProps": {
+      "initialSearchResult": {
+        "totalRecruitingResults": 150,
+        "totalResults": 150,
+        "totalCount": 150,
+        "jobList": [
+          {
+            "id": 10001,
+            "title": "バックエンドエンジニア（Python / Django / AWS）",
+            "companyName": "Acme Innovations 株式会社",
+            "minAnnualIncome": 700,
+            "maxAnnualIncome": 1000,
+            "prefecture": "東京都渋谷区",
+            "skillList": [
+              { "name": "Python" },
+              { "name": "Django" },
+              { "name": "PostgreSQL" },
+              { "name": "AWS" }
+            ],
+            "occupationList": [
+              { "name": "サーバーサイドエンジニア" }
+            ],
+            "appealPointList": [
+              { "name": "フルリモート可" },
+              { "name": "フレックスタイム制" },
+              { "name": "自社サービス開発" }
+            ]
+          },
+          {
+            "id": 10002,
+            "title": "リードデータエンジニア（GCP / BigQuery）",
+            "companyName": "Global Data Systems 合同会社",
+            "minAnnualIncome": 900,
+            "maxAnnualIncome": 1400,
+            "prefecture": "東京都港区",
+            "skillList": [
+              { "name": "Python" },
+              { "name": "SQL" },
+              { "name": "GCP" },
+              { "name": "BigQuery" }
+            ],
+            "occupationList": [
+              { "name": "データエンジニア" }
+            ],
+            "appealPointList": [
+              { "name": "リモート勤務相談可" },
+              { "name": "副業OK" }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

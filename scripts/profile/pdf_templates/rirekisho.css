@@ -1,0 +1,74 @@
+/* 履歴書（厚生労働省様式例に倣った A4 2 枚。余白は page.pdf() 側で指定） */
+:root {
+  --ink: #1a1a1a;
+  --line: #333;
+  --thin: #999;
+  --muted: #666;
+}
+
+html { font-size: 10pt; }
+body {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.5;
+  font-family: "BIZ UDMincho", "BIZ UD明朝", "Yu Mincho", "MS Mincho", serif;
+}
+
+.sheet + .sheet { break-before: page; }
+
+.sheet-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 3mm;
+}
+h1 { font-size: 18pt; font-weight: normal; margin: 0; letter-spacing: 0.2em; }
+.as-of { font-size: 9.5pt; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 1.5px solid var(--line);
+}
+th, td {
+  border: 0.5px solid var(--thin);
+  padding: 1.2mm 2mm;
+  vertical-align: middle;
+  text-align: left;
+  font-weight: normal;
+}
+th { font-size: 8.5pt; white-space: nowrap; }
+.center { text-align: center; }
+.hint { font-size: 8pt; color: var(--muted); }
+
+/* 個人情報 */
+.personal .c-label { width: 20mm; }
+.personal .c-gender { width: 64mm; }
+.personal td { overflow-wrap: anywhere; }
+.personal tr.kana td, .personal tr.kana th { font-size: 8.5pt; padding-top: 0.6mm; padding-bottom: 0.6mm; border-bottom-style: dashed; }
+.personal tr.name td { font-size: 17pt; letter-spacing: 0.1em; height: 13mm; }
+.personal tr.address td { height: 12mm; }
+
+/* 学歴・職歴・免許資格の行表 */
+.rows { margin-top: 4mm; }
+.rows .c-year { width: 17mm; }
+.rows .c-month { width: 11mm; }
+.rows th { text-align: center; }
+.rows td { height: 6.6mm; padding-top: 0; padding-bottom: 0; }
+.rows td.heading { text-align: center; letter-spacing: 0.5em; }
+.rows td.end { text-align: right; padding-right: 6mm; }
+
+/* 自由記述欄 */
+.box {
+  margin-top: 5mm;
+  border: 1.5px solid var(--line);
+}
+.box-title {
+  font-size: 8.5pt;
+  padding: 1mm 2mm;
+  border-bottom: 0.5px solid var(--thin);
+}
+.box-body { padding: 2.5mm 3mm; white-space: pre-wrap; line-height: 1.75; }
+.motivation .box-body { min-height: 90mm; }
+.wishes .box-body { min-height: 35mm; }

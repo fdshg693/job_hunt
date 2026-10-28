@@ -1,0 +1,22 @@
+<p class="result-count">{{ rows | length }} 社</p>
+<div class="table-wrap">
+<table class="data">
+  <thead><tr><th>企業</th><th>種別</th><th>理由</th><th>再検討の条件</th><th>到達</th><th>fit</th><th>検討期間</th><th>track</th></tr></thead>
+  <tbody>
+  {% for a in rows %}
+    <tr id="archive-{{ a.id }}">
+      <td>{{ a.name }}{% if a.aliases %}<div class="note">{{ a.aliases.replace(',', ' / ') }}</div>{% endif %}{% if a.recruiter %}<div class="note"><a href="{{ links.recruiter_url(a.recruiter) }}">{{ a.recruiter }}</a></div>{% endif %}</td>
+      <td><span class="badge">{{ a.status_label }}</span></td>
+      <td>{{ a.reason }}</td>
+      <td>{{ a.reconsider_if or '' }}</td>
+      <td class="nowrap">{{ a.reached_label or '' }}</td>
+      <td class="num">{{ display.format_fit(a.fit_score_min, a.fit_score_max) }}</td>
+      <td class="nowrap">{{ a.considered_at }}〜{{ a.closed_at }}</td>
+      <td>{{ a.track }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">該当なし</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
